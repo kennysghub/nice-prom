@@ -2,7 +2,7 @@
 import type { CallContext, CallOptions } from "nice-grpc-common";
 import * as _m0 from "protobufjs/minimal";
 
-export const protobufPackage = "";
+export const protobufPackage = "test";
 
 export interface GreetRequest {
   Hello: string;
@@ -127,7 +127,7 @@ export const GreetResponse = {
 export type GreetServiceDefinition = typeof GreetServiceDefinition;
 export const GreetServiceDefinition = {
   name: "GreetService",
-  fullName: "GreetService",
+  fullName: "test.GreetService",
   methods: {
     greetings: {
       name: "Greetings",
@@ -141,7 +141,7 @@ export const GreetServiceDefinition = {
 } as const;
 
 export interface GreetServiceImplementation<CallContextExt = {}> {
-  greetings(request: GreetRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GreetResponse>>;
+  greetings(request: GreetRequest, context: CallContext | CallContextExt): Promise<DeepPartial<GreetResponse>>;
 }
 
 export interface GreetServiceClient<CallOptionsExt = {}> {
