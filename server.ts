@@ -4,7 +4,8 @@ import {mergedRegistry, niceGrpcRegistry} from './registry';
 import { DeepPartial, GreetRequest, GreetResponse, GreetServiceDefinition, GreetServiceImplementation } from './compiled_proto/test'
 import { ServerCredentials } from '@grpc/grpc-js';
 
-
+// GreetService Impl object is defined with an `async` keyword, indiciating that it returns a -> PROMISE. 
+// Make sure the `greetings` method is using the -> promise-based approach instead of the callback approach. 
 
 const GreetServiceImpl: GreetServiceImplementation = {
     async greetings(request: GreetRequest): Promise<DeepPartial<GreetResponse>> {
