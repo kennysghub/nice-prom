@@ -6,7 +6,7 @@ import globalRegistry from './registry'
 import { Histogram, collectDefaultMetrics, register } from 'prom-client';
 
 // Enable default metric collection
-collectDefaultMetrics();
+console.log(collectDefaultMetrics());
 //
 // import { Histogram, register } from 'prom-client';
 // import { registry as niceGrpcRegistry } from 'nice-grpc-prometheus';
