@@ -10,7 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/kennysghub/nice-prom.git"
   },
-  "type": "module",
+
   "keywords": [],
   "author": "",
   "license": "ISC",
