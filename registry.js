@@ -5,7 +5,3 @@ var prom_client_1 = require("prom-client");
 var nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
 exports.mergedRegistry = prom_client_1.Registry.merge([prom_client_1.register, nice_grpc_prometheus_1.registry]);
 exports.default = nice_grpc_prometheus_1.registry;
-// import * as promClient from 'prom-client';
-// import { registry as niceGrpcRegistry } from 'nice-grpc-prometheus';
-// const globalRegistry = promClient.register;
-// const mergedRegistry = promClient.Registry.merge([globalRegistry, niceGrpcRegistry]);

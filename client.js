@@ -39,9 +39,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var nice_grpc_1 = require("nice-grpc");
 var nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
 var test_1 = require("./compiled_proto/test");
+var registry_1 = require("./registry");
 var prom_client_1 = require("prom-client");
 // Enable default metric collection
-(0, prom_client_1.collectDefaultMetrics)();
+// collectDefaultMetrics();
 //
 // import { Histogram, register } from 'prom-client';
 // import { registry as niceGrpcRegistry } from 'nice-grpc-prometheus';
@@ -75,7 +76,11 @@ function runClient() {
                     histogram
                         .labels('GreetService', 'greetings')
                         .observe(duration);
-                    console.log(histogram);
+                    console.log("HISTOGRAMMM----", histogram);
+                    console.log(registry_1.default.metrics().then(function (res) { return console.log("RES", res); }));
+                    console.log("DEFAULT METRICS: ", (0, prom_client_1.collectDefaultMetrics)());
+                    console.log("REGISTER: ", prom_client_1.register.getMetricsAsArray());
+                    console.log("Zeorth Element: ", prom_client_1.register.getMetricsAsArray()[0].collect);
                     return [3 /*break*/, 4];
                 case 2:
                     error_1 = _a.sent();

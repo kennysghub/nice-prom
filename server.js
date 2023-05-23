@@ -42,10 +42,26 @@ var registry_1 = require("./registry");
 var registry_2 = require("./registry");
 var test_1 = require("./compiled_proto/test");
 var grpc_js_1 = require("@grpc/grpc-js");
+var registry_1 = require("./registry");
+var prom_client_1 = require("prom-client");
+// Define the metrics
+var counterStartedTotal = new prom_client_1.Counter({
+    name: 'grpc_server_started_total',
+    help: 'Total number of RPCs started on the server',
+});
+var counterHandledTotal = new prom_client_1.Counter({
+    name: 'grpc_server_handled_total',
+    help: 'Total number of RPCs completed on the server, regardless of success or failure',
+});
 // GreetService Impl object is defined with an `async` keyword, indiciating that it returns a -> PROMISE. 
+var histogramHandlingSeconds = new prom_client_1.Histogram({
+    name: 'grpc_server_handling_seconds',
+    help: 'Histogram of response latency (seconds) of gRPC that had been application-level handled by the server',
+    buckets: [0.1, 0.5, 1, 2, 5],
+});
 // Make sure the `greetings` method is using the -> promise-based approach instead of the callback approach. 
 var GreetServiceImpl = {
-    greetings: function (request) {
+    greetings: function (request, context) {
         return __awaiter(this, void 0, void 0, function () {
             var response;
             return __generator(this, function (_a) {
@@ -53,6 +69,22 @@ var GreetServiceImpl = {
                     response = {
                         Goodbye: 'bye!',
                     };
+                    counterStartedTotal.inc();
+                    counterHandledTotal.inc();
+                    console.log('histogram---', histogramHandlingSeconds);
+                    console.log(prom_client_1.Histogram);
+                    console.log(counterStartedTotal);
+                    console.log(counterHandledTotal);
+                    counterStartedTotal.inc();
+                    // Your gRPC server logic here
+                    counterHandledTotal.inc();
+                    counterHandledTotal.inc();
+                    counterHandledTotal.inc();
+                    counterHandledTotal.inc();
+                    counterHandledTotal.inc();
+                    console.log('look---->', counterHandledTotal);
+                    // Start measuring the response handling time
+                    counterHandledTotal.inc();
                     return [2 /*return*/, response];
                 }
                 catch (err) {
@@ -64,6 +96,29 @@ var GreetServiceImpl = {
         });
     },
 };
+var allMetrics = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var getMetrics, metrics_1, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                getMetrics = registry_1.default.metrics();
+                return [4 /*yield*/, getMetrics];
+            case 1:
+                metrics_1 = _a.sent();
+                console.log(metrics_1);
+                return [2 /*return*/, metrics_1];
+            case 2:
+                error_1 = _a.sent();
+                console.log(error_1);
+                return [3 /*break*/, 3];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+allMetrics();
+var metrics = registry_1.default.metrics();
+metrics.then(function (res) { return console.log(res); });
 var server = (0, nice_grpc_1.createServer)();
 server.use((0, nice_grpc_prometheus_1.prometheusServerMiddleware)());
 server.add(test_1.GreetServiceDefinition, GreetServiceImpl);

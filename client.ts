@@ -3,10 +3,10 @@ import { prometheusClientMiddleware, prometheusServerMiddleware } from "nice-grp
 import { GreetServiceClient,GreetServiceDefinition,GreetResponse } from "./compiled_proto/test";
 import { ChannelImplementation } from "@grpc/grpc-js/build/src/channel";
 import globalRegistry from './registry'
-import { Histogram, collectDefaultMetrics, register } from 'prom-client';
+import { Histogram,Counter, collectDefaultMetrics, register } from 'prom-client';
 
 // Enable default metric collection
-console.log(collectDefaultMetrics());
+// collectDefaultMetrics();
 //
 // import { Histogram, register } from 'prom-client';
 // import { registry as niceGrpcRegistry } from 'nice-grpc-prometheus';
@@ -42,11 +42,19 @@ const client = createClientFactory()
             labelNames: ['service', 'method'],
             registers: [register],
           });
+          
           console.log('Response:', response);
           histogram
           .labels('GreetService', 'greetings')
           .observe(duration);
-          console.log(histogram)
+          console.log("HISTOGRAMMM----", histogram)
+          console.log(globalRegistry.metrics().then(res => console.log("RES", res)))
+          console.log("DEFAULT METRICS: ", collectDefaultMetrics())
+          console.log("REGISTER: ", register.getMetricsAsArray())
+          console.log("Zeorth Element: ", register.getMetricsAsArray()[0].collect)
+
+          ///
+          
         } catch (error) {
           console.error('Error:', error);
         } finally {
