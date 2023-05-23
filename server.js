@@ -41,6 +41,8 @@ var nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
 //import * as serverRegistry from './registry';
 var test_1 = require("./compiled_proto/test");
 var grpc_js_1 = require("@grpc/grpc-js");
+// GreetService Impl object is defined with an `async` keyword, indiciating that it returns a -> PROMISE. 
+// Make sure the `greetings` method is using the -> promise-based approach instead of the callback approach. 
 var GreetServiceImpl = {
     greetings: function (request) {
         return __awaiter(this, void 0, void 0, function () {
