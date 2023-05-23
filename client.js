@@ -38,30 +38,34 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var nice_grpc_1 = require("nice-grpc");
 var nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
-//import * as serverRegistry from './registry';
 var test_1 = require("./compiled_proto/test");
-var grpc_js_1 = require("@grpc/grpc-js");
-var GreetServiceImpl = {
-    greetings: function (request) {
-        return __awaiter(this, void 0, void 0, function () {
-            var response;
-            return __generator(this, function (_a) {
-                try {
-                    response = {
-                        Goodbye: 'bye!',
-                    };
-                    return [2 /*return*/, response];
-                }
-                catch (err) {
-                    console.error(err);
-                    throw new nice_grpc_1.ServerError(nice_grpc_1.Status.ABORTED, 'An error occurred');
-                }
-                return [2 /*return*/];
-            });
+var channel = (0, nice_grpc_1.createChannel)('localhost:3500', nice_grpc_1.ChannelCredentials.createInsecure());
+var client = (0, nice_grpc_1.createClientFactory)()
+    .use((0, nice_grpc_prometheus_1.prometheusClientMiddleware)())
+    .create(test_1.GreetServiceDefinition, channel);
+function runClient() {
+    return __awaiter(this, void 0, void 0, function () {
+        var response, error_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, 3, 4]);
+                    return [4 /*yield*/, client.greetings({ Hello: 'hi' })];
+                case 1:
+                    response = _a.sent();
+                    console.log('Response:', response);
+                    return [3 /*break*/, 4];
+                case 2:
+                    error_1 = _a.sent();
+                    console.error('Error:', error_1);
+                    return [3 /*break*/, 4];
+                case 3:
+                    channel.close();
+                    return [7 /*endfinally*/];
+                case 4: return [2 /*return*/];
+            }
         });
-    },
-};
-var server = (0, nice_grpc_1.createServer)();
-server.use((0, nice_grpc_prometheus_1.prometheusServerMiddleware)());
-server.add(test_1.GreetServiceDefinition, GreetServiceImpl);
-server.listen('127.0.0.1:3500', grpc_js_1.ServerCredentials.createInsecure());
+    });
+}
+runClient();
+// channel.close()

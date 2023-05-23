@@ -5,23 +5,25 @@ import { DeepPartial, GreetRequest, GreetResponse, GreetServiceDefinition, Greet
 import { ServerCredentials } from '@grpc/grpc-js';
 
 
+
 const GreetServiceImpl: GreetServiceImplementation = {
-    async greetings(request: GreetRequest, callback: any) : Promise<DeepPartial<GreetResponse>> {
-        try {
-            const response: GreetResponse = {
-                Goodbye: 'bye!'
-            };
-            callback(null, response)
-            return response;
-        } catch(err) {
-            Status.ABORTED;
-            console.log(err)
-        }
-    }
-}
+    async greetings(request: GreetRequest): Promise<DeepPartial<GreetResponse>> {
+      try {
+        const response: GreetResponse = {
+          Goodbye: 'bye!',
+        };
+        return response;
+      } catch (err) {
+        console.error(err);
+        throw new ServerError(Status.ABORTED, 'An error occurred');
+      }
+    },
+  };
+  
 
 
 const server = createServer()
-    server.add(GreetServiceDefinition, GreetServiceImpl);
+server.use(prometheusServerMiddleware())
+    server.add(GreetServiceDefinition, GreetServiceImpl)
 
 server.listen('127.0.0.1:3500', ServerCredentials.createInsecure())
