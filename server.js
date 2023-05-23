@@ -39,7 +39,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var nice_grpc_1 = require("nice-grpc");
 //import * as serverRegistry from './registry';
 var test_1 = require("./compiled_proto/test");
-var grpc_js_1 = require("@grpc/grpc-js");
 var GreetServiceImpl = {
     greetings: function (request, callback) {
         return __awaiter(this, void 0, void 0, function () {
@@ -53,13 +52,15 @@ var GreetServiceImpl = {
                     return [2 /*return*/, response];
                 }
                 catch (err) {
-                    console.log("error: ".concat(err));
+                    nice_grpc_1.Status.ABORTED;
+                    console.log(err);
                 }
                 return [2 /*return*/];
             });
         });
     }
 };
+console.log('hi johnny');
 var server = (0, nice_grpc_1.createServer)();
 server.add(test_1.GreetServiceDefinition, GreetServiceImpl);
-server.listen('127.0.0.1:3500', grpc_js_1.ServerCredentials.createInsecure());
+// server.listen('127.0.0.1:3500', ServerCredentials.createInsecure())

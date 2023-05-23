@@ -141,7 +141,7 @@ export const GreetServiceDefinition = {
 } as const;
 
 export interface GreetServiceImplementation<CallContextExt = {}> {
-  greetings(request: GreetRequest, context: CallContext | CallContextExt): Promise<DeepPartial<GreetResponse>>;
+  greetings(request: GreetRequest, context: CallContext & CallContextExt): Promise<DeepPartial<GreetResponse>>;
 }
 
 export interface GreetServiceClient<CallOptionsExt = {}> {

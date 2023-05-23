@@ -20,7 +20,8 @@ const GreetServiceImpl: GreetServiceImplementation = {
     }
 }
 
-const server = createServer();
+
+const server = createServer()
     server.add(GreetServiceDefinition, GreetServiceImpl);
 
 server.listen('127.0.0.1:3500', ServerCredentials.createInsecure())
