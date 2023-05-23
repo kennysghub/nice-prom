@@ -1,6 +1,6 @@
 import { CallContext, ServerError, Status, createServer} from 'nice-grpc';
 import {prometheusServerMiddleware} from 'nice-grpc-prometheus';
-//import * as serverRegistry from './registry';
+import {mergedRegistry, niceGrpcRegistry} from './registry';
 import { DeepPartial, GreetRequest, GreetResponse, GreetServiceDefinition, GreetServiceImplementation } from './compiled_proto/test'
 import { ServerCredentials } from '@grpc/grpc-js';
 
@@ -20,7 +20,9 @@ const GreetServiceImpl: GreetServiceImplementation = {
     },
   };
   
+await mergedRegistry.metrics();
 
+const serverStarted = niceGrpcRegistry
 
 const server = createServer()
 server.use(prometheusServerMiddleware())

@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var nice_grpc_1 = require("nice-grpc");
 var nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
-//import * as serverRegistry from './registry';
+var registry_1 = require("./registry");
 var test_1 = require("./compiled_proto/test");
 var grpc_js_1 = require("@grpc/grpc-js");
 var GreetServiceImpl = {
@@ -61,6 +61,7 @@ var GreetServiceImpl = {
         });
     },
 };
+await registry_1.mergedRegistry.metrics();
 var server = (0, nice_grpc_1.createServer)();
 server.use((0, nice_grpc_prometheus_1.prometheusServerMiddleware)());
 server.add(test_1.GreetServiceDefinition, GreetServiceImpl);
