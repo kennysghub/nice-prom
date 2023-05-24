@@ -4,13 +4,16 @@ import {prometheusServerMiddleware} from 'nice-grpc-prometheus';
 import { DeepPartial, GreetRequest, GreetResponse, GreetServiceDefinition, GreetServiceImplementation } from './compiled_proto/test'
 import { ServerCredentials } from '@grpc/grpc-js';
 
+import * as express from 'express';
 
+const app = express();
 
 const GreetServiceImpl: GreetServiceImplementation = {
     async greetings(request: GreetRequest): Promise<DeepPartial<GreetResponse>> {
       try {
         const response: GreetResponse = {
           Goodbye: 'bye!',
+
         };
         return response;
       } catch (err) {
