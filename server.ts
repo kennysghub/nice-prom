@@ -4,7 +4,6 @@ import mergedRegistry from './registry';
 import niceGrpcRegistry from './registry';
 import { DeepPartial, GreetRequest, GreetResponse, GreetServiceDefinition, GreetServiceImplementation } from './compiled_proto/test'
 import { ServerCredentials } from '@grpc/grpc-js';
-import mergedRegistry from './registry';
 import { Counter, Histogram } from 'prom-client';
 
 // Define the metrics
@@ -26,49 +25,48 @@ const histogramHandlingSeconds = new Histogram({
 // Make sure the `greetings` method is using the -> promise-based approach instead of the callback approach. 
 
 const GreetServiceImpl: GreetServiceImplementation = {
-    async greetings(request: GreetRequest,context:CallContext): Promise<DeepPartial<GreetResponse>> {
-      try {
-        const response: GreetResponse = {
+  async greetings(request: GreetRequest,context:CallContext): Promise<DeepPartial<GreetResponse>> {
+    try {
+      const response: GreetResponse = {
           Goodbye: 'bye!',
-        };
-        counterStartedTotal.inc();
-        counterHandledTotal.inc();
-        console.log('histogram---', histogramHandlingSeconds)
-        console.log(Histogram)
-        console.log(counterStartedTotal)
-        console.log(counterHandledTotal)
-        counterStartedTotal.inc();
-    // Your gRPC server logic here
-    counterHandledTotal.inc();
-    counterHandledTotal.inc();
-    counterHandledTotal.inc();
-    counterHandledTotal.inc();
-    counterHandledTotal.inc();
-    console.log('look---->', counterHandledTotal)
+      };
+      counterStartedTotal.inc();
+      counterHandledTotal.inc();
+      console.log('histogram---', histogramHandlingSeconds)
+      console.log(Histogram)
+      console.log(counterStartedTotal)
+      console.log(counterHandledTotal)
+      counterStartedTotal.inc();
+      // Your gRPC server logic here
+      counterHandledTotal.inc();
+      counterHandledTotal.inc();
+      counterHandledTotal.inc();
+      counterHandledTotal.inc();
+      counterHandledTotal.inc();
+      console.log('look---->', counterHandledTotal)
 
     // Start measuring the response handling time
-    counterHandledTotal.inc();
-        return response;
-      } catch (err) {
-        console.error(err);
-        throw new ServerError(Status.ABORTED, 'An error occurred');
-      }
-    },
-  };
-  
-  const allMetrics = async () => {
-    try {
-      const getMetrics = mergedRegistry.metrics();
-      const metrics = await getMetrics;
-      console.log(metrics);
-    
-      return metrics;
-    } catch (error) {
-      console.log(error);
+      counterHandledTotal.inc();
+      return response;
+    } catch (err) {
+      console.error(err);
+      throw new ServerError(Status.ABORTED, 'An error occurred');
     }
-  };
+  },
+};
   
-  allMetrics();
+const allMetrics = async () => {
+  try {
+    const getMetrics = mergedRegistry.metrics();
+    const metrics = await getMetrics;
+    console.log(metrics);
+    return metrics;
+  } catch (error) {
+    console.log(error);
+  }
+};
+  
+allMetrics();
 
 const metrics =  mergedRegistry.metrics();
 metrics.then(res => console.log(res))
@@ -80,10 +78,10 @@ const server = createServer()
 
 
 function getMetrics(){
-    mergedRegistry.metrics()
-    .then(result => console.log(result))
-    .then(res => niceGrpcRegistry.metrics)
-  }
+  mergedRegistry.metrics()
+  .then(result => console.log(result))
+  .then(res => niceGrpcRegistry.metrics)
+}
 
 getMetrics();
 

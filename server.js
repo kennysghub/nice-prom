@@ -42,7 +42,6 @@ var registry_1 = require("./registry");
 var registry_2 = require("./registry");
 var test_1 = require("./compiled_proto/test");
 var grpc_js_1 = require("@grpc/grpc-js");
-var registry_1 = require("./registry");
 var prom_client_1 = require("prom-client");
 // Define the metrics
 var counterStartedTotal = new prom_client_1.Counter({
@@ -97,13 +96,13 @@ var GreetServiceImpl = {
     },
 };
 var allMetrics = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var getMetrics, metrics_1, error_1;
+    var getMetrics_1, metrics_1, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
-                getMetrics = registry_1.default.metrics();
-                return [4 /*yield*/, getMetrics];
+                getMetrics_1 = registry_1.default.metrics();
+                return [4 /*yield*/, getMetrics_1];
             case 1:
                 metrics_1 = _a.sent();
                 console.log(metrics_1);
@@ -125,7 +124,7 @@ server.add(test_1.GreetServiceDefinition, GreetServiceImpl);
 function getMetrics() {
     registry_1.default.metrics()
         .then(function (result) { return console.log(result); })
-        .then(function (res) { return registry_2.default.metrics.grpc_server_handling_seconds; });
+        .then(function (res) { return registry_2.default.metrics; });
 }
 getMetrics();
 server.listen('127.0.0.1:3500', grpc_js_1.ServerCredentials.createInsecure());
