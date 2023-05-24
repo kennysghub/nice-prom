@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+
+message ContactResponse {
+    string firstName = 1;
+    string lastName = 2;
+    int64 telNum = 3;
+    string email = 4;
+}
+
+message Empty {}
+
+message ContactRequest {
+    string firstName = 1;
+    string lastName = 2;
+}
+
+message ContactList {
+    repeated ContactResponse contacts = 1;
+}
+
+service ContactService {
+    rpc GetContact(ContactRequest) returns (ContactResponse) {}
+    rpc GetContactList(Empty) returns (ContactList) {}
+    rpc CreateContact(ContactResponse) returns (ContactResponse) {}
+}

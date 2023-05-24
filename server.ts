@@ -33,7 +33,7 @@ const GreetServiceImpl: GreetServiceImplementation = {
         counterStartedTotal.inc();
         counterHandledTotal.inc();
         console.log('histogram---', histogramHandlingSeconds)
-        console.log(Histogram)
+        console.log
         console.log(counterStartedTotal)
         console.log(counterHandledTotal)
         counterStartedTotal.inc();
@@ -70,7 +70,7 @@ const GreetServiceImpl: GreetServiceImplementation = {
   allMetrics();
 
 const metrics =  mergedRegistry.metrics();
-metrics.then(res => console.log(res))
+metrics.then(res => console.log("RES--------> ", res))
 
   
 const server = createServer()

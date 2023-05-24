@@ -5,26 +5,33 @@ import { ChannelImplementation } from "@grpc/grpc-js/build/src/channel";
 import globalRegistry from './registry'
 import { Histogram,Counter, collectDefaultMetrics, register } from 'prom-client';
 
-// Enable default metric collection
-// collectDefaultMetrics();
-//
-// import { Histogram, register } from 'prom-client';
-// import { registry as niceGrpcRegistry } from 'nice-grpc-prometheus';
-
-// // Merge niceGrpcRegistry with the global registry
-// const mergedRegistry = register.setDefaultRegistry(niceGrpcRegistry);
-
-
-//
 
 const channel: ChannelImplementation = createChannel('localhost:3500', ChannelCredentials.createInsecure())
+import { ContactServiceClient, ContactRequestProto, Empty, ContactResponse, ContactList, ContactServiceDefinition } from './compiled_proto/contacts';
 
-const client = createClientFactory()
-    .use(prometheusClientMiddleware())
-    .create(GreetServiceDefinition,channel)
 
-    async function runClient(): Promise <void> {
-        try {
+const clientFactory = createClientFactory()
+.use(prometheusClientMiddleware())
+.create(GreetServiceDefinition,channel)
+interface MyGreetService extends GreetServiceDefinition {}
+// Get a single contact by first name and last name
+const another = createClientFactory()
+.create(ContactServiceDefinition,channel)
+
+
+async function getContact(firstName: string, lastName: string): Promise<ContactResponse> {
+    const request = new ContactRequestProto();
+    request.setFirstName(firstName);
+    request.setLastName(lastName);
+  
+    return new Promise<ContactResponse>((resolve, reject) => {
+    
+    });
+  }
+
+
+async function runClient(): Promise <void> {
+    try {
             // Record the start time of the RPC call
     const startTime = Date.now();
 
@@ -35,7 +42,7 @@ const client = createClientFactory()
 
     // Calculate the duration of the RPC call
     const duration = endTime - startTime;
-          const response:GreetResponse = await client.greetings({ Hello: 'hi' });
+          const response:GreetResponse = await clientFactory.greetings({ Hello: 'hi' });
           const histogram = new Histogram({
             name: 'grpc_client_request_duration',
             help: 'Duration of gRPC client requests',
@@ -48,13 +55,11 @@ const client = createClientFactory()
           .labels('GreetService', 'greetings')
           .observe(duration);
           console.log("HISTOGRAMMM----", histogram)
-          console.log(globalRegistry.metrics().then(res => console.log("RES", res)))
+          console.log(globalRegistry.metrics().then(res => console.log("RES--->", res)))
           console.log("DEFAULT METRICS: ", collectDefaultMetrics())
           console.log("REGISTER: ", register.getMetricsAsArray())
           console.log("Zeorth Element: ", register.getMetricsAsArray()[0].collect)
-
-          ///
-          
+          getContact("kenny","nguyen"); Promise <ContactResponse>
         } catch (error) {
           console.error('Error:', error);
         } finally {
@@ -64,5 +69,6 @@ const client = createClientFactory()
       
       
       runClient();
+
 // channel.close()
 

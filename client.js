@@ -41,18 +41,26 @@ var nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
 var test_1 = require("./compiled_proto/test");
 var registry_1 = require("./registry");
 var prom_client_1 = require("prom-client");
-// Enable default metric collection
-// collectDefaultMetrics();
-//
-// import { Histogram, register } from 'prom-client';
-// import { registry as niceGrpcRegistry } from 'nice-grpc-prometheus';
-// // Merge niceGrpcRegistry with the global registry
-// const mergedRegistry = register.setDefaultRegistry(niceGrpcRegistry);
-//
 var channel = (0, nice_grpc_1.createChannel)('localhost:3500', nice_grpc_1.ChannelCredentials.createInsecure());
-var client = (0, nice_grpc_1.createClientFactory)()
+var contacts_1 = require("./compiled_proto/contacts");
+var clientFactory = (0, nice_grpc_1.createClientFactory)()
     .use((0, nice_grpc_prometheus_1.prometheusClientMiddleware)())
     .create(test_1.GreetServiceDefinition, channel);
+// Get a single contact by first name and last name
+var another = (0, nice_grpc_1.createClientFactory)()
+    .create(contacts_1.ContactServiceDefinition, channel);
+function getContact(firstName, lastName) {
+    return __awaiter(this, void 0, void 0, function () {
+        var request;
+        return __generator(this, function (_a) {
+            request = new contacts_1.ContactRequestProto();
+            request.setFirstName(firstName);
+            request.setLastName(lastName);
+            return [2 /*return*/, new Promise(function (resolve, reject) {
+                })];
+        });
+    });
+}
 function runClient() {
     return __awaiter(this, void 0, void 0, function () {
         var startTime, endTime, duration, response, histogram, error_1;
@@ -63,7 +71,7 @@ function runClient() {
                     startTime = Date.now();
                     endTime = Date.now();
                     duration = endTime - startTime;
-                    return [4 /*yield*/, client.greetings({ Hello: 'hi' })];
+                    return [4 /*yield*/, clientFactory.greetings({ Hello: 'hi' })];
                 case 1:
                     response = _a.sent();
                     histogram = new prom_client_1.Histogram({
@@ -77,10 +85,12 @@ function runClient() {
                         .labels('GreetService', 'greetings')
                         .observe(duration);
                     console.log("HISTOGRAMMM----", histogram);
-                    console.log(registry_1.default.metrics().then(function (res) { return console.log("RES", res); }));
+                    console.log(registry_1.default.metrics().then(function (res) { return console.log("RES--->", res); }));
                     console.log("DEFAULT METRICS: ", (0, prom_client_1.collectDefaultMetrics)());
                     console.log("REGISTER: ", prom_client_1.register.getMetricsAsArray());
                     console.log("Zeorth Element: ", prom_client_1.register.getMetricsAsArray()[0].collect);
+                    getContact("kenny", "nguyen");
+                    Promise;
                     return [3 /*break*/, 4];
                 case 2:
                     error_1 = _a.sent();
