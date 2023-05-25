@@ -20,10 +20,10 @@ const grpc_js_1 = require("@grpc/grpc-js");
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
 const port = 9090;
-app.get('/metrics', (req, res) => {
-    res.set('Content-Type', registry_1.mergedRegistry.contentType);
-    res.send(registry_1.mergedRegistry.metrics().then(data => data));
-});
+// app.get('/metrics', (req, res) => {
+//   res.set('Content-Type', niceGrpcRegistry.contentType);
+//   res.send(niceGrpcRegistry.metrics().then(data => data))
+// })
 //console.log(mergedRegistry.metrics());
 app.listen(port, () => console.log(`listening on port:${port}`));
 const GreetServiceImpl = {
@@ -46,3 +46,7 @@ const server = (0, nice_grpc_1.createServer)();
 server.use((0, nice_grpc_prometheus_1.prometheusServerMiddleware)());
 server.add(test_1.GreetServiceDefinition, GreetServiceImpl);
 server.listen('127.0.0.1:3500', grpc_js_1.ServerCredentials.createInsecure());
+app.get('/metrics', (req, res) => {
+    res.set('Content-Type', registry_1.niceGrpcRegistry.contentType);
+    res.send(registry_1.niceGrpcRegistry.metrics().then(data => data));
+});
