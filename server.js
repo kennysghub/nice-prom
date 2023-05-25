@@ -38,9 +38,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var nice_grpc_1 = require("nice-grpc");
 var nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
-//import * as serverRegistry from './registry';
+var registry_1 = require("./registry");
 var test_1 = require("./compiled_proto/test");
 var grpc_js_1 = require("@grpc/grpc-js");
+var express_1 = require("express");
+var app = (0, express_1.default)();
+var port = 9090;
+app.get('/metrics', function (req, res) {
+    res.set('Content-Type', registry_1.mergedRegistry.contentType);
+    res.end(registry_1.mergedRegistry.metrics());
+});
+app.listen(port, function () { return console.log("listening on port:".concat(port)); });
 var GreetServiceImpl = {
     greetings: function (request) {
         return __awaiter(this, void 0, void 0, function () {
