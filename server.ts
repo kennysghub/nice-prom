@@ -1,6 +1,6 @@
 import { CallContext, ServerError, Status, createServer} from 'nice-grpc';
 import {prometheusServerMiddleware} from 'nice-grpc-prometheus';
-import {mergedRegistry, niceGrpcRegistry} from './registry';
+import {mergedRegistry} from './registry';
 import { DeepPartial, GreetRequest, GreetResponse, GreetServiceDefinition, GreetServiceImplementation } from './compiled_proto/test'
 import { ServerCredentials } from '@grpc/grpc-js';
 
@@ -9,10 +9,10 @@ import express from 'express';
 const app = express();
 const port = 9090;
 
-// app.get('/metrics', (req, res) => {
-//   res.set('Content-Type', niceGrpcRegistry.contentType);
-//   res.send(niceGrpcRegistry.metrics().then(data => data))
-// })
+app.get('/metrics', (req, res) => {
+  res.set('Content-Type', mergedRegistry.contentType);
+  res.send(mergedRegistry.metrics().then(data => data))
+})
 
 //console.log(mergedRegistry.metrics());
 
@@ -40,8 +40,3 @@ const server = createServer()
     server.add(GreetServiceDefinition, GreetServiceImpl)
 
 server.listen('127.0.0.1:3500', ServerCredentials.createInsecure())
-
-app.get('/metrics', (req, res) => {
-  res.set('Content-Type', niceGrpcRegistry.contentType);
-  res.send(niceGrpcRegistry.metrics().then(data => data))
-})
