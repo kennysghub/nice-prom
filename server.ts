@@ -18,7 +18,7 @@ import {
 } from './common'
 const app = express();
 const port = 8080;
-collectDefaultMetrics()
+
 
 import {register as globalRegistry, Registry } from 'prom-client';
 import {registry as niceGrpcRegistry} from 'nice-grpc-prometheus';
@@ -31,6 +31,7 @@ const grpcRequestDurationHistogram = new Histogram({
   labelNames: ['method'],
   buckets: [0.1, 0.5, 1, 5, 10],
 });
+// const grpcCounter = new Counter
 const serverHandlingSecondsMetric = new Histogram({
   registers: [mergedRegistry],
   name: 'grpc_server_handling_secondss',
@@ -78,6 +79,8 @@ app.use( async (req, res, next) => {
     const meow = await grpcRequestDurationHistogram.get()
     console.log('grpc-----', meow);
     const newMetric = await serverHandlingSecondsMetric.get();
+    const severMsgSentMetric = await serverStreamMsgSentMetric.get();
+    console.log("serverMsgSentMetric: ", severMsgSentMetric)
     console.log(newMetric)
     next()
     
@@ -85,7 +88,7 @@ app.use( async (req, res, next) => {
   
 
 
-app.get('/', async (req, res,next) => {
+app.use( async (req, res,next) => {
   res.set('Content-Type', mergedRegistry.contentType);
   try{
     const metrics = await mergedRegistry.metrics()
@@ -100,7 +103,8 @@ app.get('/', async (req, res,next) => {
     const newMetric = await serverHandlingSecondsMetric.get();
     serverStreamMsgSentMetric.get().then(res => console.log(res))
 
-    serverStreamMsgSentMetric.labels()
+    const k = serverStreamMsgSentMetric.labels('typeLabel','serviceLabel','methodLabel','pathLabel')
+    console.log(k)
     console.log(newMetric)
    console.log(metrics)
     next()
@@ -153,5 +157,6 @@ const GreetServiceImpl: GreetServiceImplementation = {
       server.add(GreetServiceDefinition, GreetServiceImpl)
       
   server.listen('0.0.0.0:3500', ServerCredentials.createInsecure())
+
 
 

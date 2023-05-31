@@ -12,7 +12,6 @@ const prom_client_1 = require("prom-client");
 const common_1 = require("./common");
 const app = (0, express_1.default)();
 const port = 8080;
-(0, prom_client_1.collectDefaultMetrics)();
 const prom_client_2 = require("prom-client");
 const nice_grpc_prometheus_2 = require("nice-grpc-prometheus");
 const mergedRegistry = prom_client_2.Registry.merge([nice_grpc_prometheus_2.registry, prom_client_2.register]);
@@ -23,6 +22,7 @@ const grpcRequestDurationHistogram = new prom_client_1.Histogram({
     labelNames: ['method'],
     buckets: [0.1, 0.5, 1, 5, 10],
 });
+// const grpcCounter = new Counter
 const serverHandlingSecondsMetric = new prom_client_1.Histogram({
     registers: [mergedRegistry],
     name: 'grpc_server_handling_secondss',
@@ -60,10 +60,12 @@ app.use(async (req, res, next) => {
     const meow = await grpcRequestDurationHistogram.get();
     console.log('grpc-----', meow);
     const newMetric = await serverHandlingSecondsMetric.get();
+    const severMsgSentMetric = await serverStreamMsgSentMetric.get();
+    console.log("serverMsgSentMetric: ", severMsgSentMetric);
     console.log(newMetric);
     next();
 });
-app.get('/', async (req, res, next) => {
+app.use(async (req, res, next) => {
     res.set('Content-Type', mergedRegistry.contentType);
     try {
         const metrics = await mergedRegistry.metrics();
@@ -75,7 +77,8 @@ app.get('/', async (req, res, next) => {
         console.log('rawr', grpcRequestDurationHistogram.observe({ method: req.method }, duration));
         const newMetric = await serverHandlingSecondsMetric.get();
         serverStreamMsgSentMetric.get().then(res => console.log(res));
-        serverStreamMsgSentMetric.labels();
+        const k = serverStreamMsgSentMetric.labels('typeLabel', 'serviceLabel', 'methodLabel', 'pathLabel');
+        console.log(k);
         console.log(newMetric);
         console.log(metrics);
         next();
