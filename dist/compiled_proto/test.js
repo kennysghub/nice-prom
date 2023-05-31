@@ -66,12 +66,11 @@ exports.GreetRequest = {
         return obj;
     },
     create(base) {
-        return exports.GreetRequest.fromPartial(base !== null && base !== void 0 ? base : {});
+        return exports.GreetRequest.fromPartial(base ?? {});
     },
     fromPartial(object) {
-        var _a;
         const message = createBaseGreetRequest();
-        message.Hello = (_a = object.Hello) !== null && _a !== void 0 ? _a : "";
+        message.Hello = object.Hello ?? "";
         return message;
     },
 };
@@ -115,12 +114,11 @@ exports.GreetResponse = {
         return obj;
     },
     create(base) {
-        return exports.GreetResponse.fromPartial(base !== null && base !== void 0 ? base : {});
+        return exports.GreetResponse.fromPartial(base ?? {});
     },
     fromPartial(object) {
-        var _a;
         const message = createBaseGreetResponse();
-        message.Goodbye = (_a = object.Goodbye) !== null && _a !== void 0 ? _a : "";
+        message.Goodbye = object.Goodbye ?? "";
         return message;
     },
 };
