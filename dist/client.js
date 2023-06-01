@@ -1,41 +1,60 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const nice_grpc_1 = require("nice-grpc");
-const nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
 const test_1 = require("./compiled_proto/test");
-// const app = express();
-// const port = 9090;
-// app.listen(port, () => console.log(`listening on port:${port}`))
-const channel = (0, nice_grpc_1.createChannel)('localhost:3500', nice_grpc_1.ChannelCredentials.createInsecure());
+const prom_client_1 = require("prom-client");
+const nice_grpc_prometheus_1 = require("nice-grpc-prometheus");
+// const mergedRegistry = Registry.merge([globalRegistry, niceGrpcRegistry]);
+const registry_1 = require("./registry");
+const channel = (0, nice_grpc_1.createChannel)('https://localhost:3500', nice_grpc_1.ChannelCredentials.createInsecure());
+const registry = new prom_client_1.Registry();
+(0, prom_client_1.collectDefaultMetrics)();
+// !!!!! These are different constructors from <prom-client> !!!!!!!!!!!!!!
+const requestCounter = new prom_client_1.Counter({
+    name: "grpc_client_requests_total",
+    help: "Total number of gRPC client requests",
+    labelNames: ["service", "method"],
+    registers: [registry],
+});
+const clientLatencyHistogram = new prom_client_1.Histogram({
+    name: "grpc_client_handling_seconds",
+    help: "Histogram of response latency (seconds) of the gRPC until it is finished by the application.",
+    labelNames: ["grpc_type", "grpc_service", "grpc_method", "grpc_path", "grpc_code"],
+    registers: [registry],
+});
+const latencySummary = new prom_client_1.Summary({
+    name: 'grpc_client_latency_percentiles',
+    help: 'Latency percentiles of the gRPC requests',
+    labelNames: ['grpc_service', 'grpc_method'],
+    percentiles: [0.5, 0.9, 0.99],
+    registers: [registry],
+});
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+async function runClient() {
+    try {
+        const request = { Hello: 'hi' };
+        //* Need the response and invoking the client line 
+        const response = await client.greetings(request);
+        requestCounter.inc({ service: "test", method: "greetings" });
+        const clientLatencyHist = await clientLatencyHistogram.get();
+        console.log("Client Latency Histogram:______________", clientLatencyHist);
+        console.log('This is the response from inside client.ts runClient() Method:_____', response);
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+    finally {
+        channel.close();
+        try {
+            const metrics = await registry_1.mergedRegistry.metrics();
+            console.log("Await mergedRegistry.metrics()_____________", metrics);
+        }
+        catch (error) {
+            console.log("ERROR RETREIVEING METRICS: ", error);
+        }
+    }
+}
 const client = (0, nice_grpc_1.createClientFactory)()
     .use((0, nice_grpc_prometheus_1.prometheusClientMiddleware)())
     .create(test_1.GreetServiceDefinition, channel);
-function runClient() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const response = yield client.greetings({ Hello: 'hi' });
-            console.log('Response:', response);
-        }
-        catch (error) {
-            console.error('Error:', error);
-        }
-        finally {
-            channel.close();
-        }
-    });
-}
 runClient();
-// app.get('/metrics', (req, res) => {
-//   res.set('Content-Type', mergedRegistry.contentType);
-//   res.send(mergedRegistry.metrics().then(data => data))
-// })
-// channel.close()
