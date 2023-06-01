@@ -10,35 +10,35 @@ const grpc_js_1 = require("@grpc/grpc-js");
 const express_1 = __importDefault(require("express"));
 const prom_client_1 = require("prom-client");
 const common_1 = require("./common");
-const prom_client_2 = require("prom-client");
 // !! collectDefaultMetrics() => Includes node metrics by default.
 // !! Need to check if it includes any gRPC metrics that we need. 
 // Merge Registrys 
-const registry = new prom_client_2.Registry();
-const mergedRegistry = prom_client_2.Registry.merge([registry, prom_client_2.register]);
+// const registry = new Registry()
+// const mergedRegistry = Registry.merge([ niceGrpcRegistry,globalRegistry]);
+const registry_1 = require("./registry");
 // Metric Constructors 
 const grpcRequestDurationHistogram = new prom_client_1.Histogram({
-    registers: [mergedRegistry],
+    registers: [registry_1.mergedRegistry],
     name: 'grpc_request_duration_seconds',
     help: 'Duration of gRPC requests',
     labelNames: ['method'],
     buckets: [0.1, 0.5, 1, 5, 10],
 });
 const serverHandlingSecondsMetric = new prom_client_1.Histogram({
-    registers: [mergedRegistry],
+    registers: [registry_1.mergedRegistry],
     name: 'grpc_server_handling_secondss',
     help: 'Histogram of response latency (seconds) of gRPC that had been application-level handled by the server.',
     labelNames: [common_1.typeLabel, common_1.serviceLabel, common_1.methodLabel, common_1.pathLabel, common_1.codeLabel],
     buckets: common_1.latencySecondsBuckets,
 });
 const serverStartedMetric = new prom_client_1.Counter({
-    registers: [mergedRegistry],
+    registers: [registry_1.mergedRegistry],
     name: 'grpc_server_started_totalsss',
     help: 'Total number of RPCs started on the server.',
     labelNames: [common_1.typeLabel, common_1.serviceLabel, common_1.methodLabel, common_1.pathLabel],
 });
 const serverStreamMsgSentMetric = new prom_client_1.Counter({
-    registers: [mergedRegistry],
+    registers: [registry_1.mergedRegistry],
     name: 'grpc_server_msg_sent_totalss',
     help: 'Total number of gRPC stream messages sent by the server.',
     labelNames: [common_1.typeLabel, common_1.serviceLabel, common_1.methodLabel, common_1.pathLabel],
@@ -52,10 +52,10 @@ const serverStreamMsgSentMetric = new prom_client_1.Counter({
 // metric1.set(42);
 // metric2.set(3.14);
 // const mergedRegistry2 = Registry.merge([registry1,registry2])
-// Middleware to track request duration
+// Middleware to track request duration`
 // =================== EXPRESS ROUTE FOR PROMETHEUS PULLING METRICS =============
 const app = (0, express_1.default)();
-const port = 8080;
+const port = 9100;
 app.use(async (req, res, next) => {
     const startTime = Date.now();
     const duration = (Date.now() - startTime) / 1000;
@@ -74,15 +74,15 @@ app.use(async (req, res, next) => {
     next();
 });
 app.use(async (req, res, next) => {
-    res.set('Content-Type', mergedRegistry.contentType);
+    res.set('Content-Type', registry_1.mergedRegistry.contentType);
     try {
-        const metrics = await mergedRegistry.metrics();
+        const metrics = await registry_1.mergedRegistry.metrics();
         console.log("In Express, awaiting mergedRegistry.metrics() : __________", metrics);
         // const metrics2 = await mergedRegistry2.metrics();
         // console.log('Guage Metrics: ____________________',metrics2);
         const startTime = Date.now();
         const duration = (Date.now() - startTime) / 1000; // Convert to seconds
-        console.log('grpcRequestDurationHistogram Observe Method: _____________', grpcRequestDurationHistogram.observe({ method: req.method }, duration));
+        console.log('grpcRequestDurationHistogram Observe Method: _____________', grpcRequestDurationHistogram.observe({ method: 'unary' }, duration));
         const newMetric = serverHandlingSecondsMetric.observe(5);
         serverStreamMsgSentMetric.get().then(res => console.log(res));
         const servStartedMetric = await serverStartedMetric.get();
@@ -99,10 +99,12 @@ app.use(async (req, res, next) => {
         console.log('Error', err);
     }
 });
+// EXPRESS FOR REACT 
+//
 app.get('/metrics', async (req, res) => {
     res.set('Content-Type', prom_client_1.register.contentType);
     console.log("Inside /metrics route :____________________________");
-    res.end(await mergedRegistry.metrics());
+    res.end(await registry_1.mergedRegistry.metrics());
 });
 app.listen(port, () => {
     console.log(`Prometheus metrics endpoint listening on port ${port}`);
@@ -114,9 +116,13 @@ const GreetServiceImpl = {
             const response = {
                 Goodbye: 'bye!',
             };
-            const mergedRMetrics = await mergedRegistry.metrics();
+            const mergedRMetrics = await registry_1.mergedRegistry.metrics();
             console.log("Request From greetings :_______", request);
             console.log("Inside GreetServiceImpl: awaiting mergedRegistry.metrics()______", mergedRMetrics);
+            console.log('gRPC Req Dur Histogram: _______', grpcRequestDurationHistogram.observe(1));
+            serverHandlingSecondsMetric.observe(2);
+            const histogramSeconds = await serverHandlingSecondsMetric.get();
+            console.log('HISTOGRAM SECONDS _______', histogramSeconds);
             console.log("Response: ", response);
             return response;
         }

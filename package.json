@@ -2,9 +2,11 @@
   "name": "nice-prom",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "expressServer/expressServer.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack serve & node expressServer/expressServer.ts",
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -19,6 +21,7 @@
   "homepage": "https://github.com/kennysghub/nice-prom#readme",
   "dependencies": {
     "@grpc/grpc-js": "^1.8.14",
+    "@reduxjs/toolkit": "^1.9.5",
     "@types/google-protobuf": "^3.15.6",
     "@types/node": "^20.2.3",
     "abort-controller-x": "^0.4.1",
@@ -29,14 +32,31 @@
     "nice-grpc": "^2.1.4",
     "nice-grpc-common": "^2.0.2",
     "nice-grpc-prometheus": "^0.1.6",
+    "nodemon": "^2.0.22",
+    "pg": "^8.11.0",
     "prom-client": "^14.2.0",
     "prometheus": "^0.1.7",
     "protobufjs": "^7.2.3",
-    "typescript": "^5.0.4"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.7",
+    "react-router-dom": "^6.11.2",
+    "typescript": "^5.0.4",
+    "webpack-dev-server": "^4.15.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.1",
+    "@babel/preset-env": "^7.22.4",
+    "@babel/preset-react": "^7.22.3",
     "@types/express": "^4.17.17",
+    "babel-loader": "^9.1.2",
+    "css-loader": "^6.8.1",
+    "file-loader": "^6.2.0",
     "grpc-tools": "^1.12.4",
-    "ts-proto": "^1.147.3"
+    "html-webpack-plugin": "^5.5.1",
+    "imports-loader": "^4.0.1",
+    "sa": "^0.2.50",
+    "ts-proto": "^1.147.3",
+    "webpack-cli": "^5.1.1"
   }
 }

@@ -3,7 +3,7 @@ import {prometheusServerMiddleware} from 'nice-grpc-prometheus';
 import { DeepPartial, GreetRequest, GreetResponse, GreetServiceDefinition, GreetServiceImplementation } from './compiled_proto/test'
 import { ServerCredentials } from '@grpc/grpc-js';
 import express,{Express,Request,Response} from 'express';
-import { register,Counter,Gauge, Histogram,collectDefaultMetrics } from 'prom-client';
+import { register,Counter,Gauge, Histogram, collectDefaultMetrics } from 'prom-client';
 import {
   codeLabel,
   getLabels,
@@ -16,12 +16,13 @@ import {
 } from './common'
 import {register as globalRegistry, Registry } from 'prom-client';
 import {registry as niceGrpcRegistry} from 'nice-grpc-prometheus';
-
+import path from 'path'
 // !! collectDefaultMetrics() => Includes node metrics by default.
   // !! Need to check if it includes any gRPC metrics that we need. 
 // Merge Registrys 
-const registry = new Registry()
-const mergedRegistry = Registry.merge([ registry,globalRegistry]);
+// const registry = new Registry()
+// const mergedRegistry = Registry.merge([ niceGrpcRegistry,globalRegistry]);
+import { mergedRegistry } from './registry';
 // Metric Constructors 
 const grpcRequestDurationHistogram = new Histogram({
   registers: [mergedRegistry],
@@ -63,10 +64,10 @@ const serverStreamMsgSentMetric = new Counter({
 
 
 
-// Middleware to track request duration
+// Middleware to track request duration`
 // =================== EXPRESS ROUTE FOR PROMETHEUS PULLING METRICS =============
 const app = express();
-const port = 8080;
+const port = 9100;
 
 app.use( async (req, res, next) => {
   const startTime = Date.now();
@@ -97,7 +98,7 @@ app.use( async (req, res,next) => {
     const startTime = Date.now();
     const duration = (Date.now() - startTime) / 1000; // Convert to seconds
 
-    console.log('grpcRequestDurationHistogram Observe Method: _____________', grpcRequestDurationHistogram.observe({ method: req.method }, duration));
+    console.log('grpcRequestDurationHistogram Observe Method: _____________', grpcRequestDurationHistogram.observe({ method: 'unary' }, duration));
     const newMetric =  serverHandlingSecondsMetric.observe(5);
     serverStreamMsgSentMetric.get().then(res => console.log(res))
     const servStartedMetric = await serverStartedMetric.get();
@@ -115,7 +116,10 @@ app.use( async (req, res,next) => {
     console.log('Error', err)
   }
 });
+// EXPRESS FOR REACT 
 
+
+//
 app.get('/metrics', async(req,res)=> {
   res.set('Content-Type', register.contentType)
   console.log("Inside /metrics route :____________________________")
@@ -133,9 +137,14 @@ const GreetServiceImpl: GreetServiceImplementation = {
         const response: GreetResponse = {
           Goodbye: 'bye!',
         }
-        const mergedRMetrics = await mergedRegistry.metrics()
+        const mergedRMetrics = await mergedRegistry.metrics();
         console.log("Request From greetings :_______", request);
         console.log("Inside GreetServiceImpl: awaiting mergedRegistry.metrics()______",mergedRMetrics);
+        console.log('gRPC Req Dur Histogram: _______', grpcRequestDurationHistogram.observe(1))
+        serverHandlingSecondsMetric.observe(2)
+       const histogramSeconds = await serverHandlingSecondsMetric.get()
+       console.log('HISTOGRAM SECONDS _______', histogramSeconds)
+
         console.log("Response: ", response)
         return response;
       } catch (err) {
@@ -144,6 +153,7 @@ const GreetServiceImpl: GreetServiceImplementation = {
       }
     },
   };
+
 
 /* ========== Start gRPC Server ===========*/
 const server = createServer()
