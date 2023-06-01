@@ -4,14 +4,13 @@ import { GreetServiceClient,GreetServiceDefinition,GreetResponse,GreetRequest } 
 import { ChannelImplementation } from "@grpc/grpc-js/build/src/channel";
 import {register as globalRegistry, Registry,Counter,Histogram, collectDefaultMetrics,Summary} from 'prom-client';
 import {registry as niceGrpcRegistry} from 'nice-grpc-prometheus';
-// // use `await mergedRegistry.metrics()` to export all metrics
 // const mergedRegistry = Registry.merge([globalRegistry, niceGrpcRegistry]);
 import {mergedRegistry} from './registry';
 
 const channel: ChannelImplementation = createChannel('https://localhost:3500', ChannelCredentials.createInsecure())
 const registry = new Registry()
 collectDefaultMetrics()
-// Adding Counter to registry
+// !!!!! These are different constructors from <prom-client> !!!!!!!!!!!!!!
 const requestCounter = new Counter({
   name: "grpc_client_requests_total",
   help: "Total number of gRPC client requests",
@@ -31,6 +30,7 @@ const latencySummary = new Summary({
   percentiles: [0.5, 0.9, 0.99], // Update with desired percentiles
   registers: [registry],
 });
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 async function runClient(): Promise <void> {
     try {
       const request:GreetRequest = {Hello: 'hi'} 
@@ -39,11 +39,11 @@ async function runClient(): Promise <void> {
       requestCounter.inc({service: "test", method: "greetings"});
       const clientLatencyHist = await clientLatencyHistogram.get();
       console.log("Client Latency Histogram:______________", clientLatencyHist)
-      console.log('da resposne', response)
-  }  catch (error) {
+      console.log('This is the response from inside client.ts runClient() Method:_____', response)
+  } catch (error) {
       console.error('Error:', error);
     } finally {
-      // channel.close();
+        channel.close();
       try{
         const metrics = await mergedRegistry.metrics();
         console.log("Await mergedRegistry.metrics()_____________", metrics)
@@ -53,8 +53,9 @@ async function runClient(): Promise <void> {
   }
 }
 const client = createClientFactory()
-    .use(prometheusClientMiddleware())
-    .create(GreetServiceDefinition,channel)
+  .use(prometheusClientMiddleware())
+  .create(GreetServiceDefinition,channel)
+
 runClient()
 
 
